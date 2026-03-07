@@ -1,16 +1,5 @@
 // Daily Performance Tracker - Main Script
 
-// Fixed list of daily tasks
-const FIXED_TASKS = [
-  { id: 1, text: 'Morning Exercise', emoji: '🏃' },
-  { id: 2, text: 'Review Goals', emoji: '🎯' },
-  { id: 3, text: 'Deep Work (2 hours)', emoji: '💻' },
-  { id: 4, text: 'Read 20 minutes', emoji: '📚' },
-  { id: 5, text: 'Learn Something New', emoji: '🧠' },
-  { id: 6, text: 'Reflect & Journal', emoji: '📝' },
-  { id: 7, text: 'Rest & Recharge', emoji: '😴' },
-];
-
 // Status values
 const STATUS = {
   COMPLETED: 'completed',
@@ -21,29 +10,36 @@ const STATUS = {
 // Application state
 let currentDate = new Date();
 let chartInstances = {};
+let currentStreak = 0;
 
 // Initialize app on page load
 document.addEventListener('DOMContentLoaded', () => {
-  initializePush();
+  console.log('DOM loaded, initializing app');
+  initializeToday();
   setupEventListeners();
   renderToday();
   renderHistory();
   updateDashboard();
+  console.log('App initialized');
 });
 
+// Also initialize immediately since script is at bottom
+console.log('Script loaded, initializing app');
+initializeToday();
+setupEventListeners();
+renderToday();
+renderHistory();
+updateDashboard();
+console.log('App initialized');
+
 // ===== INITIALIZATION =====
-function initializePush() {
+function initializeToday() {
   const today = getDateString(new Date());
   if (!getTasksForDate(today)) {
-    saveTasksForDate(today, initializeTodaysTasks());
+    saveTasksForDate(today, []);
   }
-}
-
-function initializeTodaysTasks() {
-  return FIXED_TASKS.map(task => ({
-    ...task,
-    status: STATUS.NOT_DONE,
-  }));
+  loadStreak();
+  updateStreakDisplay();
 }
 
 function setupEventListeners() {
@@ -63,6 +59,12 @@ function setupEventListeners() {
   document.getElementById('next-day').addEventListener('click', () => {
     currentDate.setDate(currentDate.getDate() + 1);
     renderToday();
+  });
+
+  // Add task
+  document.getElementById('add-task-btn').addEventListener('click', addNewTask);
+  document.getElementById('task-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addNewTask();
   });
 
   // Reset button
@@ -90,6 +92,37 @@ function switchTab(tabName) {
 }
 
 // ===== TODAY'S TASKS =====
+function addNewTask() {
+  console.log('addNewTask called');
+  const input = document.getElementById('task-input');
+  const text = input.value.trim();
+  console.log('Input value:', text);
+
+  if (!text) {
+    console.log('No text, returning');
+    return;
+  }
+
+  const dateStr = getDateString(currentDate);
+  let tasks = getTasksForDate(dateStr) || [];
+  console.log('Current tasks:', tasks);
+
+  const newTask = {
+    id: Date.now(),
+    text: text,
+    status: STATUS.NOT_DONE,
+  };
+
+  tasks.push(newTask);
+  saveTasksForDate(dateStr, tasks);
+
+  console.log('Task added, new tasks:', tasks);
+  input.value = '';
+  input.focus();
+  renderToday();
+  updateDashboard();
+}
+
 function renderToday() {
   const dateStr = getDateString(currentDate);
   const weekday = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
@@ -102,59 +135,67 @@ function renderToday() {
     ? 'Today'
     : `${weekday}, ${month} ${day}`;
 
-  // Load or initialize tasks
-  let tasks = getTasksForDate(dateStr);
-  if (!tasks) {
-    tasks = initializeTodaysTasks();
-    saveTasksForDate(dateStr, tasks);
-  }
+  // Load tasks
+  let tasks = getTasksForDate(dateStr) || [];
 
   // Render tasks
   const taskList = document.getElementById('task-list');
   taskList.innerHTML = '';
 
-  tasks.forEach(task => {
-    const li = document.createElement('li');
-    li.className = 'task-item';
+  if (tasks.length === 0) {
+    taskList.innerHTML = '<p class="empty-message">No tasks yet. Add one to get started!</p>';
+  } else {
+    tasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task-item';
 
-    const left = document.createElement('div');
-    left.className = 'task-left';
+      const left = document.createElement('div');
+      left.className = 'task-left';
 
-    const label = document.createElement('span');
-    label.className = `task-label ${task.status}`;
-    label.textContent = `${task.emoji} ${task.text}`;
+      const label = document.createElement('span');
+      label.className = `task-label ${task.status}`;
+      label.textContent = task.text;
 
-    left.appendChild(label);
+      left.appendChild(label);
 
-    const statusBtns = document.createElement('div');
-    statusBtns.className = 'task-status-btns';
+      const statusBtns = document.createElement('div');
+      statusBtns.className = 'task-status-btns';
 
-    // Completed button
-    const completedBtn = document.createElement('button');
-    completedBtn.className = `status-btn ${task.status === STATUS.COMPLETED ? 'completed' : ''}`;
-    completedBtn.textContent = '✅ Done';
-    completedBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.COMPLETED));
+      // Completed button
+      const completedBtn = document.createElement('button');
+      completedBtn.className = `status-btn ${task.status === STATUS.COMPLETED ? 'completed' : ''}`;
+      completedBtn.textContent = '✅ Done';
+      completedBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.COMPLETED));
 
-    // Half Done button
-    const halfDoneBtn = document.createElement('button');
-    halfDoneBtn.className = `status-btn ${task.status === STATUS.HALF_DONE ? 'half-done' : ''}`;
-    halfDoneBtn.textContent = '⚠️ Half';
-    halfDoneBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.HALF_DONE));
+      // Half Done button
+      const halfDoneBtn = document.createElement('button');
+      halfDoneBtn.className = `status-btn ${task.status === STATUS.HALF_DONE ? 'half-done' : ''}`;
+      halfDoneBtn.textContent = '⚠️ Half';
+      halfDoneBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.HALF_DONE));
 
-    // Not Done button
-    const notDoneBtn = document.createElement('button');
-    notDoneBtn.className = `status-btn ${task.status === STATUS.NOT_DONE ? 'not-done' : ''}`;
-    notDoneBtn.textContent = '❌ Todo';
-    notDoneBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.NOT_DONE));
+      // Not Done button
+      const notDoneBtn = document.createElement('button');
+      notDoneBtn.className = `status-btn ${task.status === STATUS.NOT_DONE ? 'not-done' : ''}`;
+      notDoneBtn.textContent = '❌ Todo';
+      notDoneBtn.addEventListener('click', () => updateTaskStatus(dateStr, task.id, STATUS.NOT_DONE));
 
-    statusBtns.appendChild(completedBtn);
-    statusBtns.appendChild(halfDoneBtn);
-    statusBtns.appendChild(notDoneBtn);
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = '🗑️';
+      deleteBtn.title = 'Delete task';
+      deleteBtn.addEventListener('click', () => deleteTask(dateStr, task.id));
 
-    li.appendChild(left);
-    li.appendChild(statusBtns);
-    taskList.appendChild(li);
-  });
+      statusBtns.appendChild(completedBtn);
+      statusBtns.appendChild(halfDoneBtn);
+      statusBtns.appendChild(notDoneBtn);
+      statusBtns.appendChild(deleteBtn);
+
+      li.appendChild(left);
+      li.appendChild(statusBtns);
+      taskList.appendChild(li);
+    });
+  }
 
   updateProgress();
 }
@@ -167,14 +208,26 @@ function updateTaskStatus(dateStr, taskId, newStatus) {
   saveTasksForDate(dateStr, tasks);
   renderToday();
   updateDashboard();
+  calculateStreak(); // Recalculate streak when task status changes
+}
+
+function deleteTask(dateStr, taskId) {
+  let tasks = getTasksForDate(dateStr);
+  tasks = tasks.filter(t => t.id !== taskId);
+  saveTasksForDate(dateStr, tasks);
+  renderToday();
+  updateDashboard();
+  calculateStreak(); // Recalculate streak when task is deleted
 }
 
 function resetAllTasks() {
   const dateStr = getDateString(currentDate);
-  const tasks = initializeTodaysTasks();
+  let tasks = getTasksForDate(dateStr) || [];
+  tasks = tasks.map(t => ({ ...t, status: STATUS.NOT_DONE }));
   saveTasksForDate(dateStr, tasks);
   renderToday();
   updateDashboard();
+  calculateStreak(); // Recalculate streak when tasks are reset
 }
 
 function updateProgress() {
@@ -315,7 +368,6 @@ function updateBarChart() {
       scales: {
         y: {
           beginAtZero: true,
-          max: FIXED_TASKS.length,
           ticks: {
             stepSize: 1,
           },
@@ -350,7 +402,7 @@ function renderHistory() {
 
   allDates.forEach(dateStr => {
     const tasks = getTasksForDate(dateStr);
-    if (!tasks) return;
+    if (!tasks || tasks.length === 0) return;
 
     const historyDay = document.createElement('div');
     historyDay.className = 'history-day';
@@ -420,31 +472,48 @@ function getAllStoredDates() {
   return dates.sort().reverse();
 }
 
-// Update progress bar and text
-function updateProgress(){
-  const total = tasks.length;
-  const completed = tasks.filter(t => t.completed).length;
-  const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
-  progressFill.style.width = percent + '%';
-  progressText.textContent = `${percent}% completed`;
-  countText.textContent = `${completed} / ${total}`;
+// ===== STREAK MANAGEMENT =====
+function loadStreak() {
+  const streak = localStorage.getItem('performance_streak');
+  currentStreak = streak ? parseInt(streak) : 0;
 }
 
-// Form submit handler: add task
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  addTask(input.value);
-  input.value = '';
-  input.focus();
-});
-
-// Initialize app
-function init(){
-  loadTasks();
-  renderTasks();
+function saveStreak() {
+  localStorage.setItem('performance_streak', currentStreak.toString());
 }
 
-init();
+function calculateStreak() {
+  const allDates = getAllStoredDates().sort(); // Sort chronologically
+  let streak = 0;
+  let foundBreak = false;
 
-// Expose helpers for debugging (optional)
-// window.__tasks = tasks;
+  // Check from most recent backwards
+  for (let i = allDates.length - 1; i >= 0; i--) {
+    const dateStr = allDates[i];
+    const tasks = getTasksForDate(dateStr);
+
+    if (!tasks || tasks.length === 0) continue;
+
+    const completedTasks = tasks.filter(t => t.status === STATUS.COMPLETED).length;
+    const completionRate = completedTasks / tasks.length;
+
+    // Consider it a good day if 70% or more tasks are completed
+    if (completionRate >= 0.7) {
+      streak++;
+    } else {
+      // If we find a bad day, stop counting
+      break;
+    }
+  }
+
+  currentStreak = streak;
+  saveStreak();
+  updateStreakDisplay();
+}
+
+function updateStreakDisplay() {
+  const streakElement = document.getElementById('streak-number');
+  if (streakElement) {
+    streakElement.textContent = currentStreak;
+  }
+}

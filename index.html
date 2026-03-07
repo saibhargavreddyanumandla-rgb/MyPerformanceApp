@@ -10,8 +10,17 @@
   <body>
     <main class="app">
       <header class="header">
-        <h1 class="title">📊 Daily Performance Tracker</h1>
-        <p class="subtitle">Track your daily tasks and monitor your progress</p>
+        <div class="header-content">
+          <div class="header-left">
+            <h1 class="title">📊 Daily Performance Tracker</h1>
+            <p class="subtitle">Track your daily tasks and monitor your progress</p>
+          </div>
+          <div class="streak-counter" id="streak-counter">
+            <span class="streak-emoji">🔥</span>
+            <span class="streak-number" id="streak-number">0</span>
+            <span class="streak-label">day streak</span>
+          </div>
+        </div>
       </header>
 
       <!-- Navigation Tabs -->
@@ -30,10 +39,15 @@
             <button id="next-day" class="date-btn">Next →</button>
           </div>
 
+          <div class="task-input-wrapper">
+            <input id="task-input" class="task-input" type="text" placeholder="Add a new task..." />
+            <button id="add-task-btn" class="add-task-btn">Add Task</button>
+          </div>
+
           <div class="progress-wrap">
             <div class="progress-info">
               <span id="progress-text">0% completed</span>
-              <span id="count-text">0 / 7</span>
+              <span id="count-text">0 / 0</span>
             </div>
             <div class="progress-bar">
               <div id="progress-fill" class="progress-fill" style="width:0%"></div>
@@ -93,6 +107,6 @@
       <footer class="footer">Daily Performance Tracker • Works Offline • Mobile Friendly</footer>
     </main>
 
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
   </body>
 </html>
