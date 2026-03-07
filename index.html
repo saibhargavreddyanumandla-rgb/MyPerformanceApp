@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Performance Task App</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <h1 class="title">Performance Task App</h1>
+        <p class="subtitle">Track tasks — completion updates the progress bar.</p>
+      </header>
+
+      <section class="card">
+        <form id="task-form" class="task-form" aria-label="Add new task">
+          <input id="task-input" class="task-input" type="text" placeholder="Add a new task..." aria-label="Task description" required />
+          <button class="add-btn" type="submit">Add</button>
+        </form>
+
+        <div class="progress-wrap" aria-hidden="false">
+          <div class="progress-info">
+            <span id="progress-text">0% completed</span>
+            <span id="count-text">0 / 0</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <ul id="task-list" class="task-list" aria-live="polite"></ul>
+      </section>
+
+      <footer class="footer">Simple, local-only. Works offline and on mobile.</footer>
+    </main>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
