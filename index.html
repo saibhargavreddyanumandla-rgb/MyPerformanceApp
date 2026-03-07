@@ -3,36 +3,94 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Performance Task App</title>
+    <title>Daily Performance Tracker</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <main class="app">
       <header class="header">
-        <h1 class="title">Performance Task App</h1>
-        <p class="subtitle">Track tasks — completion updates the progress bar.</p>
+        <h1 class="title">📊 Daily Performance Tracker</h1>
+        <p class="subtitle">Track your daily tasks and monitor your progress</p>
       </header>
 
-      <section class="card">
-        <form id="task-form" class="task-form" aria-label="Add new task">
-          <input id="task-input" class="task-input" type="text" placeholder="Add a new task..." aria-label="Task description" required />
-          <button class="add-btn" type="submit">Add</button>
-        </form>
+      <!-- Navigation Tabs -->
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="today">Today's Tasks</button>
+        <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="history">History</button>
+      </div>
 
-        <div class="progress-wrap" aria-hidden="false">
-          <div class="progress-info">
-            <span id="progress-text">0% completed</span>
-            <span id="count-text">0 / 0</span>
+      <!-- TODAY'S TASKS TAB -->
+      <section id="today" class="tab-content active">
+        <div class="card">
+          <div class="date-header">
+            <button id="prev-day" class="date-btn">← Prev</button>
+            <h2 id="current-date" class="date-title">Today</h2>
+            <button id="next-day" class="date-btn">Next →</button>
           </div>
-          <div class="progress-bar">
-            <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+
+          <div class="progress-wrap">
+            <div class="progress-info">
+              <span id="progress-text">0% completed</span>
+              <span id="count-text">0 / 7</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+            </div>
           </div>
+
+          <ul id="task-list" class="task-list" aria-live="polite"></ul>
+
+          <button id="reset-btn" class="reset-btn">Reset All Tasks</button>
         </div>
-
-        <ul id="task-list" class="task-list" aria-live="polite"></ul>
       </section>
 
-      <footer class="footer">Simple, local-only. Works offline and on mobile.</footer>
+      <!-- DASHBOARD TAB -->
+      <section id="dashboard" class="tab-content">
+        <div class="card">
+          <h2>Performance Overview</h2>
+          
+          <div class="chart-grid">
+            <div class="chart-container">
+              <h3>Overall Performance</h3>
+              <canvas id="pie-chart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+              <h3>Last 7 Days Performance</h3>
+              <canvas id="bar-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Total Completed</span>
+              <span id="total-completed" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Total Half Done</span>
+              <span id="total-half-done" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Total Not Done</span>
+              <span id="total-not-done" class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY TAB -->
+      <section id="history" class="tab-content">
+        <div class="card">
+          <h2>Task History</h2>
+          <div id="history-list" class="history-list">
+            <p class="empty-message">No task history yet</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">Daily Performance Tracker • Works Offline • Mobile Friendly</footer>
     </main>
 
     <script src="script.js" defer></script>
