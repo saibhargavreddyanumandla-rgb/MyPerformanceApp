@@ -12,25 +12,12 @@ let currentDate = new Date();
 let chartInstances = {};
 let currentStreak = 0;
 
-// Initialize app on page load
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing app');
-  initializeToday();
-  setupEventListeners();
-  renderToday();
-  renderHistory();
-  updateDashboard();
-  console.log('App initialized');
-});
-
-// Also initialize immediately since script is at bottom
-console.log('Script loaded, initializing app');
+// Initialize app when script loads (DOM is already loaded since script is at bottom)
 initializeToday();
 setupEventListeners();
 renderToday();
 renderHistory();
 updateDashboard();
-console.log('App initialized');
 
 // ===== INITIALIZATION =====
 function initializeToday() {
@@ -93,19 +80,13 @@ function switchTab(tabName) {
 
 // ===== TODAY'S TASKS =====
 function addNewTask() {
-  console.log('addNewTask called');
   const input = document.getElementById('task-input');
   const text = input.value.trim();
-  console.log('Input value:', text);
 
-  if (!text) {
-    console.log('No text, returning');
-    return;
-  }
+  if (!text) return;
 
   const dateStr = getDateString(currentDate);
   let tasks = getTasksForDate(dateStr) || [];
-  console.log('Current tasks:', tasks);
 
   const newTask = {
     id: Date.now(),
@@ -116,11 +97,11 @@ function addNewTask() {
   tasks.push(newTask);
   saveTasksForDate(dateStr, tasks);
 
-  console.log('Task added, new tasks:', tasks);
   input.value = '';
   input.focus();
   renderToday();
   updateDashboard();
+  calculateStreak();
 }
 
 function renderToday() {
@@ -208,7 +189,7 @@ function updateTaskStatus(dateStr, taskId, newStatus) {
   saveTasksForDate(dateStr, tasks);
   renderToday();
   updateDashboard();
-  calculateStreak(); // Recalculate streak when task status changes
+  calculateStreak();
 }
 
 function deleteTask(dateStr, taskId) {
@@ -364,7 +345,6 @@ function updateBarChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      indexAxis: 'x',
       scales: {
         y: {
           beginAtZero: true,
