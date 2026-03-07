@@ -25,8 +25,29 @@ function initializeToday() {
   if (!getTasksForDate(today)) {
     saveTasksForDate(today, []);
   }
+  carryOverTasks();
   loadStreak();
   updateStreakDisplay();
+}
+
+function carryOverTasks() {
+  const today = getDateString(new Date());
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getDateString(yesterday);
+  const yesterdayTasks = getTasksForDate(yesterdayStr);
+  if (!yesterdayTasks) return;
+  const unfinished = yesterdayTasks.filter(t => t.status !== STATUS.COMPLETED);
+  if (unfinished.length === 0) return;
+  let todayTasks = getTasksForDate(today) || [];
+  unfinished.forEach(task => {
+    const exists = todayTasks.some(t => t.text === task.text);
+    if (!exists) {
+      const newTask = { ...task, id: Date.now() + Math.random() };
+      todayTasks.push(newTask);
+    }
+  });
+  saveTasksForDate(today, todayTasks);
 }
 
 function setupEventListeners() {
@@ -112,9 +133,15 @@ function renderToday() {
 
   // Update date display
   const isToday = getDateString(new Date()) === dateStr;
+  const isFuture = currentDate > new Date();
   document.getElementById('current-date').textContent = isToday
     ? 'Today'
     : `${weekday}, ${month} ${day}`;
+
+  // Disable input for future dates
+  document.getElementById('task-input').disabled = isFuture;
+  document.getElementById('add-task-btn').disabled = isFuture;
+  document.getElementById('reset-btn').disabled = isFuture;
 
   // Load tasks
   let tasks = getTasksForDate(dateStr) || [];
@@ -171,6 +198,13 @@ function renderToday() {
       statusBtns.appendChild(halfDoneBtn);
       statusBtns.appendChild(notDoneBtn);
       statusBtns.appendChild(deleteBtn);
+
+      if (isFuture) {
+        completedBtn.disabled = true;
+        halfDoneBtn.disabled = true;
+        notDoneBtn.disabled = true;
+        deleteBtn.disabled = true;
+      }
 
       li.appendChild(left);
       li.appendChild(statusBtns);
