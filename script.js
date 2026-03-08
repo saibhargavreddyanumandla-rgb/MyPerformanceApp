@@ -251,7 +251,6 @@ function deleteTask(dateStr, taskId) {
 
 function resetAllTasks() {
   const dateStr = getDateString(currentDate);
-  if (dateStr !== getDateString(new Date())) return; // Only allow for today
 
   saveTasksForDate(dateStr, []);
   renderToday();
