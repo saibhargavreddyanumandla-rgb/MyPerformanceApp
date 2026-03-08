@@ -253,9 +253,7 @@ function resetAllTasks() {
   const dateStr = getDateString(currentDate);
   if (dateStr !== getDateString(new Date())) return; // Only allow for today
 
-  let tasks = getTasksForDate(dateStr) || [];
-  tasks = tasks.map(t => ({ ...t, status: STATUS.NOT_DONE }));
-  saveTasksForDate(dateStr, tasks);
+  saveTasksForDate(dateStr, []);
   renderToday();
   updateDashboard();
   calculateStreak(); // Recalculate streak when tasks are reset
