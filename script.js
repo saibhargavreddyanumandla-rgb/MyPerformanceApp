@@ -23,6 +23,7 @@ updateDashboard();
 function initializeToday() {
   loadStreak();
   updateStreakDisplay();
+  loadTheme();
 }
 
 function setupEventListeners() {
@@ -52,6 +53,24 @@ function setupEventListeners() {
 
   // Reset button
   document.getElementById('reset-btn').addEventListener('click', resetAllTasks);
+
+  // Theme selector
+  document.getElementById('theme-select').addEventListener('change', (e) => {
+    const theme = e.target.value;
+    applyTheme(theme);
+    localStorage.setItem('selectedTheme', theme);
+  });
+}
+
+// ===== THEME MANAGEMENT =====
+function loadTheme() {
+  const theme = localStorage.getItem('selectedTheme') || 'soft-gradient';
+  document.getElementById('theme-select').value = theme;
+  applyTheme(theme);
+}
+
+function applyTheme(theme) {
+  document.body.className = `theme-${theme}`;
 }
 
 // ===== TAB MANAGEMENT =====
