@@ -75,6 +75,14 @@ function applyTheme(theme) {
   } else {
     document.body.setAttribute('data-theme', theme);
   }
+  // Update charts when theme changes
+  if (chartInstances.pie || chartInstances.bar) {
+    updateCharts();
+  }
+}
+
+function isDarkMode() {
+  return document.body.getAttribute('data-theme') === 'dark-mode';
 }
 
 // ===== TAB MANAGEMENT =====
@@ -336,6 +344,7 @@ function updatePieChart() {
     chartInstances.pie.destroy();
   }
 
+  const isDark = isDarkMode();
   chartInstances.pie = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -357,11 +366,19 @@ function updatePieChart() {
           position: 'bottom',
           labels: {
             padding: 12,
+            color: isDark ? '#ffffff' : '#000000',
             font: {
               size: 14,
               weight: '600',
             },
           },
+        },
+        tooltip: {
+          backgroundColor: isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+          titleColor: isDark ? '#ffffff' : '#000000',
+          bodyColor: isDark ? '#ffffff' : '#000000',
+          borderColor: isDark ? '#ffffff' : '#000000',
+          borderWidth: 1,
         },
       },
     },
@@ -397,6 +414,7 @@ function updateBarChart() {
     chartInstances.bar.destroy();
   }
 
+  const isDark = isDarkMode();
   chartInstances.bar = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -405,8 +423,8 @@ function updateBarChart() {
         {
           label: 'Completed Tasks',
           data: last7Days.map(d => d.completed),
-          backgroundColor: '#4f46e5',
-          borderColor: '#3730a3',
+          backgroundColor: isDark ? '#6366f1' : '#4f46e5',
+          borderColor: isDark ? '#7c3aed' : '#3730a3',
           borderWidth: 1,
           borderRadius: 6,
         },
@@ -416,16 +434,35 @@ function updateBarChart() {
       responsive: true,
       maintainAspectRatio: true,
       scales: {
+        x: {
+          ticks: {
+            color: isDark ? '#ffffff' : '#000000',
+          },
+          grid: {
+            color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          },
+        },
         y: {
           beginAtZero: true,
           ticks: {
             stepSize: 1,
+            color: isDark ? '#ffffff' : '#000000',
+          },
+          grid: {
+            color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
           },
         },
       },
       plugins: {
         legend: {
           display: false,
+        },
+        tooltip: {
+          backgroundColor: isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
+          titleColor: isDark ? '#ffffff' : '#000000',
+          bodyColor: isDark ? '#ffffff' : '#000000',
+          borderColor: isDark ? '#ffffff' : '#000000',
+          borderWidth: 1,
         },
       },
     },
