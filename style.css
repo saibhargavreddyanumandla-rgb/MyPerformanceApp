@@ -255,6 +255,13 @@ body{
   color: var(--accent);
 }
 
+.date-message{
+  color: var(--danger);
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+}
+
 /* Progress */
 .progress-wrap{
   margin-bottom: 24px;

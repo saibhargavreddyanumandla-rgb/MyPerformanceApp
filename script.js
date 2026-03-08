@@ -21,33 +21,8 @@ updateDashboard();
 
 // ===== INITIALIZATION =====
 function initializeToday() {
-  const today = getDateString(new Date());
-  if (!getTasksForDate(today)) {
-    saveTasksForDate(today, []);
-  }
-  carryOverTasks();
   loadStreak();
   updateStreakDisplay();
-}
-
-function carryOverTasks() {
-  const today = getDateString(new Date());
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = getDateString(yesterday);
-  const yesterdayTasks = getTasksForDate(yesterdayStr);
-  if (!yesterdayTasks) return;
-  const unfinished = yesterdayTasks.filter(t => t.status !== STATUS.COMPLETED);
-  if (unfinished.length === 0) return;
-  let todayTasks = getTasksForDate(today) || [];
-  unfinished.forEach(task => {
-    const exists = todayTasks.some(t => t.text === task.text);
-    if (!exists) {
-      const newTask = { ...task, id: Date.now() + Math.random() };
-      todayTasks.push(newTask);
-    }
-  });
-  saveTasksForDate(today, todayTasks);
 }
 
 function setupEventListeners() {
@@ -107,6 +82,8 @@ function addNewTask() {
   if (!text) return;
 
   const dateStr = getDateString(currentDate);
+  if (dateStr !== getDateString(new Date())) return; // Only allow for today
+
   let tasks = getTasksForDate(dateStr) || [];
 
   const newTask = {
@@ -117,6 +94,13 @@ function addNewTask() {
 
   tasks.push(newTask);
   saveTasksForDate(dateStr, tasks);
+
+  // Add to master if not already there
+  const master = getMasterTasks();
+  if (!master.includes(text)) {
+    master.push(text);
+    saveMasterTasks(master);
+  }
 
   input.value = '';
   input.focus();
@@ -132,19 +116,45 @@ function renderToday() {
   const day = currentDate.getDate();
 
   // Update date display
-  const isToday = getDateString(new Date()) === dateStr;
-  const isFuture = currentDate > new Date();
+  const today = new Date();
+  const todayStr = getDateString(today);
+  const isToday = dateStr === todayStr;
+  const isFuture = currentDate > today;
+  const isPast = currentDate < today;
+  const canEdit = isToday;
   document.getElementById('current-date').textContent = isToday
     ? 'Today'
     : `${weekday}, ${month} ${day}`;
 
-  // Disable input for future dates
-  document.getElementById('task-input').disabled = isFuture;
-  document.getElementById('add-task-btn').disabled = isFuture;
-  document.getElementById('reset-btn').disabled = isFuture;
+  // Disable input for non-today dates
+  document.getElementById('task-input').disabled = !canEdit;
+  document.getElementById('add-task-btn').disabled = !canEdit;
+  document.getElementById('reset-btn').disabled = !canEdit;
+
+  // Set message
+  let message = '';
+  if (isFuture) message = 'You cannot complete tasks for future days.';
+  else if (isPast) message = 'This is a past day, tasks are view-only.';
+  document.getElementById('date-message').textContent = message;
 
   // Load tasks
   let tasks = getTasksForDate(dateStr) || [];
+
+  // If no tasks for today or future, load from master
+  if (!tasks && currentDate >= new Date()) {
+    const master = getMasterTasks();
+    if (master.length > 0) {
+      tasks = master.map(text => ({
+        id: Date.now() + Math.random(),
+        text: text,
+        status: STATUS.NOT_DONE,
+      }));
+      if (isToday) {
+        saveTasksForDate(dateStr, tasks); // Save for today
+      }
+      // For future, don't save, just display
+    }
+  }
 
   // Render tasks
   const taskList = document.getElementById('task-list');
@@ -199,7 +209,7 @@ function renderToday() {
       statusBtns.appendChild(notDoneBtn);
       statusBtns.appendChild(deleteBtn);
 
-      if (isFuture) {
+      if (!canEdit) {
         completedBtn.disabled = true;
         halfDoneBtn.disabled = true;
         notDoneBtn.disabled = true;
@@ -216,6 +226,8 @@ function renderToday() {
 }
 
 function updateTaskStatus(dateStr, taskId, newStatus) {
+  if (dateStr !== getDateString(new Date())) return; // Only allow for today
+
   let tasks = getTasksForDate(dateStr);
   tasks = tasks.map(t =>
     t.id === taskId ? { ...t, status: newStatus } : t
@@ -227,6 +239,8 @@ function updateTaskStatus(dateStr, taskId, newStatus) {
 }
 
 function deleteTask(dateStr, taskId) {
+  if (dateStr !== getDateString(new Date())) return; // Only allow for today
+
   let tasks = getTasksForDate(dateStr);
   tasks = tasks.filter(t => t.id !== taskId);
   saveTasksForDate(dateStr, tasks);
@@ -237,6 +251,8 @@ function deleteTask(dateStr, taskId) {
 
 function resetAllTasks() {
   const dateStr = getDateString(currentDate);
+  if (dateStr !== getDateString(new Date())) return; // Only allow for today
+
   let tasks = getTasksForDate(dateStr) || [];
   tasks = tasks.map(t => ({ ...t, status: STATUS.NOT_DONE }));
   saveTasksForDate(dateStr, tasks);
@@ -472,6 +488,15 @@ function getTasksForDate(dateStr) {
 function saveTasksForDate(dateStr, tasks) {
   const key = `tasks_${dateStr}`;
   localStorage.setItem(key, JSON.stringify(tasks));
+}
+
+function getMasterTasks() {
+  const data = localStorage.getItem('master_tasks');
+  return data ? JSON.parse(data) : [];
+}
+
+function saveMasterTasks(tasks) {
+  localStorage.setItem('master_tasks', JSON.stringify(tasks));
 }
 
 function getAllStoredDates() {
