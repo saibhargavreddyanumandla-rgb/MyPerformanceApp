@@ -119,8 +119,8 @@ function renderToday() {
   const today = new Date();
   const todayStr = getDateString(today);
   const isToday = dateStr === todayStr;
-  const isFuture = currentDate > today;
-  const isPast = currentDate < today;
+  const isFuture = dateStr > todayStr;
+  const isPast = dateStr < todayStr;
   const canEdit = isToday;
   document.getElementById('current-date').textContent = isToday
     ? 'Today'
