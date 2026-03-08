@@ -70,7 +70,11 @@ function loadTheme() {
 }
 
 function applyTheme(theme) {
-  document.body.className = `theme-${theme}`;
+  if (theme === 'soft-gradient') {
+    document.body.removeAttribute('data-theme');
+  } else {
+    document.body.setAttribute('data-theme', theme);
+  }
 }
 
 // ===== TAB MANAGEMENT =====

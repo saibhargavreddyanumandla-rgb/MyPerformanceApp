@@ -551,11 +551,11 @@ body{
 }
 
 /* Themes */
-.theme-soft-gradient body {
+[data-theme="soft-gradient"] body {
   background: linear-gradient(135deg, var(--bg) 0%, #eef2ff 100%);
 }
 
-.theme-dark-mode {
+[data-theme="dark-mode"] {
   --bg: #1a1a1a;
   --card: #2d2d2d;
   --accent: #6366f1;
@@ -570,11 +570,11 @@ body{
   --shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
 
-.theme-dark-mode body {
+[data-theme="dark-mode"] body {
   background: var(--bg);
 }
 
-.theme-minimal-light {
+[data-theme="minimal-light"] {
   --bg: #ffffff;
   --card: #f9f9f9;
   --accent: #000000;
@@ -589,7 +589,7 @@ body{
   --shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.theme-minimal-light body {
+[data-theme="minimal-light"] body {
   background: var(--bg);
 }
 
