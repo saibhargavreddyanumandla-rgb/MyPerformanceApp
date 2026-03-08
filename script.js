@@ -64,7 +64,12 @@ function setupEventListeners() {
 
 // ===== THEME MANAGEMENT =====
 function loadTheme() {
-  const theme = localStorage.getItem('selectedTheme') || 'soft-gradient';
+  let theme = localStorage.getItem('selectedTheme') || 'soft-gradient';
+  // If stored theme is not available, default to soft-gradient
+  if (!['soft-gradient', 'dark-mode'].includes(theme)) {
+    theme = 'soft-gradient';
+    localStorage.setItem('selectedTheme', theme);
+  }
   document.getElementById('theme-select').value = theme;
   applyTheme(theme);
 }
@@ -424,8 +429,8 @@ function updateBarChart() {
           label: 'Completed Tasks',
           data: last7Days.map(d => d.completed),
           backgroundColor: isDark ? '#6366f1' : '#4f46e5',
-          borderColor: isDark ? '#7c3aed' : '#3730a3',
-          borderWidth: 1,
+          borderColor: isDark ? '#ffffff' : '#000000',
+          borderWidth: 2,
           borderRadius: 6,
         },
       ],
@@ -439,7 +444,7 @@ function updateBarChart() {
             color: isDark ? '#ffffff' : '#000000',
           },
           grid: {
-            color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+            color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
           },
         },
         y: {
@@ -449,7 +454,7 @@ function updateBarChart() {
             color: isDark ? '#ffffff' : '#000000',
           },
           grid: {
-            color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+            color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
           },
         },
       },

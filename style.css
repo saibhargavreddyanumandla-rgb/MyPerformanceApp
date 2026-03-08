@@ -574,25 +574,6 @@ body{
   background: var(--bg);
 }
 
-[data-theme="minimal-light"] {
-  --bg: #ffffff;
-  --card: #f9f9f9;
-  --accent: #000000;
-  --accent-light: #333333;
-  --muted: #666666;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --text-primary: #000000;
-  --text-secondary: #666666;
-  --border: #cccccc;
-  --shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-[data-theme="minimal-light"] body {
-  background: var(--bg);
-}
-
 /* Responsive Design */
 @media (max-width: 768px){
   .app{
